@@ -208,7 +208,8 @@ if run:
             if report["hard_violations"]:
                 st.error("Hard violations:")
                 st.dataframe(pd.DataFrame(report["hard_violations"]),
-                             use_container_width=True, hide_index=True)
+                             use_container_width=True, hide_index=True,
+                             key=f"viol_{sc}")
 
             # --- schedule tables ---
             acc = pd.read_csv(os.path.join(res["out_dir"], "SCHEDULE_ACCESS.csv"))
@@ -216,7 +217,8 @@ if run:
             results = pd.read_csv(os.path.join(res["out_dir"], "RESULTS.csv"))
 
             st.markdown("#### Contract completion")
-            st.dataframe(results, use_container_width=True, hide_index=True)
+            st.dataframe(results, use_container_width=True, hide_index=True,
+                         key=f"results_{sc}")
 
             # --- simple timeline: activity x week heat of access-nights ---
             st.markdown("#### Access timeline (activities × weeks)")
@@ -224,30 +226,35 @@ if run:
                      .reset_index(name="nights"))
             grid = pivot.pivot(index="activity_id", columns="week",
                                values="nights").fillna(0).astype(int)
-            st.dataframe(grid, use_container_width=True)
+            st.dataframe(grid, use_container_width=True, key=f"grid_{sc}")
 
             # --- capacity hotspots ---
             st.markdown("#### Busiest locations (by distinct possessions)")
             hot = (occ.groupby(["location_id", "week"])["co_share_group"]
                    .nunique().reset_index(name="possessions")
                    .sort_values("possessions", ascending=False).head(15))
-            st.dataframe(hot, use_container_width=True, hide_index=True)
+            st.dataframe(hot, use_container_width=True, hide_index=True,
+                         key=f"hot_{sc}")
 
             # --- downloads ---
             st.markdown("#### Download submission files")
             d1, d2, d3, d4 = st.columns(4)
             d1.download_button("SCHEDULE_ACCESS.csv",
-                               acc.to_csv(index=False), f"SCHEDULE_ACCESS.csv",
-                               "text/csv", use_container_width=True)
+                               acc.to_csv(index=False), "SCHEDULE_ACCESS.csv",
+                               "text/csv", use_container_width=True,
+                               key=f"dl_access_{sc}")
             d2.download_button("SCHEDULE_OCCUPANCY.csv",
                                occ.to_csv(index=False), "SCHEDULE_OCCUPANCY.csv",
-                               "text/csv", use_container_width=True)
+                               "text/csv", use_container_width=True,
+                               key=f"dl_occ_{sc}")
             d3.download_button("RESULTS.csv",
                                results.to_csv(index=False), "RESULTS.csv",
-                               "text/csv", use_container_width=True)
-            d4.download_button(f"⬇ All 3 (zip)", _zip_dir(res["out_dir"]),
+                               "text/csv", use_container_width=True,
+                               key=f"dl_results_{sc}")
+            d4.download_button("⬇ All 3 (zip)", _zip_dir(res["out_dir"]),
                                f"submission_{sc}.zip", "application/zip",
-                               use_container_width=True)
+                               use_container_width=True,
+                               key=f"dl_zip_{sc}")
 else:
     st.info("👈 Upload the 8 instance CSVs (or use the bundled sample), pick "
             "scenario(s), and click **Run scheduler**.")
