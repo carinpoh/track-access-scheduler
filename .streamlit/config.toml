@@ -4,3 +4,9 @@ base = "light"
 
 [server]
 maxUploadSize = 20
+headless = true
+enableCORS = false
+enableXsrfProtection = false
+
+[browser]
+gatherUsageStats = false
